@@ -1,4 +1,4 @@
-# 3D-Graphics_Engine
+# 3D Graphics Engine
 
 This is a 3D graphics engine module and program.
 Given a .obj file containing the vertex data for a triangle mesh in 3D space, the program will project it onto a 2D screen with simple lighting.
