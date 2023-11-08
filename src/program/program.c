@@ -87,7 +87,7 @@ void main_loop(Program* program)
     Camera* camera = program->camera;
     Keyboard* keyboard = program->keyboard;
 
-    char* object_name = "UtahTeapot.txt";
+    char* object_name = "UtahTeapot.obj";
     Mesh* mesh = create_mesh_from_txt(object_name);
 
     Mesh* viewed_mesh = create_mesh(mesh->num_triangles);
