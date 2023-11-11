@@ -294,47 +294,44 @@ void mat_sub(Matrix* A, Matrix* B, Matrix* C)
 
 void mat_vec_mul(Matrix* A, Vector* v, Vector* k)
 {
+    /*
     int mat_rows = A->rows; int mat_cols = A->cols;
     int vec_rows = v->rows;
 
     if ((vec_rows == mat_cols) && (k->rows == mat_rows))
+    */
     {
-        for (int i = 0; i < mat_rows; i++)
+        double value = 0;
+        for (int i = 0; i < A->rows; i++)
         {
-            double value = 0;
-            for (int j = 0; j < mat_cols; j++)
+            value = 0;
+            for (int j = 0; j < A->cols; j++)
             {
                 value += index_mat(A, i, j) * index_vec(v, j);
             }
             k->data[i] = value;
         }
     }
-    else
-    {
-        printf("Matrices are of different sizes.\n");
-    }
 }
 
 void vec_mat_mul(Matrix* A, Vector* v, Vector* k)
 {
+    /*
     int mat_rows = A->rows; int mat_cols = A->cols;
     int vec_rows = v->rows;
 
     if ((vec_rows == mat_cols) && (k->rows == mat_rows))
+    */
     {
-        for (int i = 0; i < mat_cols; i++)
+        for (int i = 0; i < A->cols; i++)
         {
             double value = 0;
-            for (int j = 0; j < mat_rows; j++)
+            for (int j = 0; j < A->rows; j++)
             {
                 value += index_mat(A, j, i) * index_vec(v, j);
             }
             k->data[i] = value;
         }
-    }
-    else
-    {
-        printf("Matrices are of different sizes.\n");
     }
 }
 

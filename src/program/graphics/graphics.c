@@ -14,7 +14,7 @@ void draw_line(SDL_Window *window, SDL_Renderer *renderer, int x1, int y1, int x
 bool point_in_frame(int x, int y);
 void scale_triangle(Triangle* triangle);
 void fill_triangle(SDL_Window *window, SDL_Renderer *renderer, Triangle* triangle, int color[4]);
-void render_triangle(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics, Triangle* triangle, Camera* camera, Matrix* mat_proj);
+void render_triangle(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics, Triangle* triangle, Camera* camera, Matrix* mat_proj, Triangle* tri_projected);
 
 void set_default_graphics(Graphics* graphics)
 {
@@ -92,7 +92,6 @@ bool is_triangle_visible(Triangle* triangle, Camera* camera)
     return true;
 }
 
-
 int trig_compare(const void* a, const void* b)
 {
     //printf("trig cmpr used!\n");
@@ -108,7 +107,6 @@ int trig_compare(const void* a, const void* b)
     if (z1 > z2) return -1;
     return 0;
 }
-
 
 int insert_trig_compare(Triangle* t1, Triangle* t2)
 {
@@ -137,12 +135,7 @@ void insertion_sort_mesh(Mesh* mesh, Mesh* viewed_mesh)
         key = viewed_mesh->triangles[i];
         key2 = mesh->triangles[i];
         j = i - 1;
- 
-        /* Move elements of arr[0..i-1], 
-           that are greater than key, 
-           to one position ahead of 
-           their current position */
-        //while (j >= 0 && arr[j] > key) 
+
         while (j >= 0 && insert_trig_compare(viewed_mesh->triangles[j], key)) 
         {
             viewed_mesh->triangles[j + 1] = viewed_mesh->triangles[j];
@@ -159,38 +152,55 @@ void render_mesh(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics,
     Matrix* mat_proj = create_mat(4, 4);
     generate_mat_proj(mat_proj, graphics);
 
+    Vector* up = create_vec(COORD_3D_DIMS);
+    Vector* target = create_vec(VECTOR_4D_SIZE);
+
+    double arr_up[COORD_3D_DIMS] = { 0, 1, 0 };
+    arr_to_vec(up, &arr_up[0], COORD_3D_DIMS);
+
+    double arr_target[VECTOR_4D_SIZE] = { 0, 0, 1, 1 };
+    arr_to_vec(target, &arr_target[0], VECTOR_4D_SIZE);
+
+    vec_add(camera->position, camera->direction, target);
+
+    Matrix* look_at_mat = create_mat(VECTOR_4D_SIZE, VECTOR_4D_SIZE);
+    generate_looks_at_mat(camera->position, target, up, look_at_mat);
+
+
     for (int trig_idx = 0; trig_idx < mesh->num_triangles; trig_idx++)
     {
         viewed_mesh->triangles[trig_idx]->shade = get_triangle_shade(mesh->triangles[trig_idx]);
-        view_triangle(mesh->triangles[trig_idx], camera, viewed_mesh->triangles[trig_idx]);
+        view_triangle(mesh->triangles[trig_idx], look_at_mat, viewed_mesh->triangles[trig_idx]);
     }
 
     insertion_sort_mesh(mesh, viewed_mesh);
+
+    Triangle* tri_projected = create_triangle();
 
     for (int trig_idx = 0; trig_idx < viewed_mesh->num_triangles; trig_idx++)
     {
         if (is_triangle_visible(viewed_mesh->triangles[trig_idx], camera))
         {
-            render_triangle(window, renderer, graphics, viewed_mesh->triangles[trig_idx], camera, mat_proj);
+            render_triangle(window, renderer, graphics, viewed_mesh->triangles[trig_idx], camera, mat_proj, tri_projected);
         }
         
     }
-    destroy_mat(mat_proj); 
+    destroy_mat(mat_proj); destroy_triangle(tri_projected);
 }
 
-void render_triangle(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics, Triangle* triangle, Camera* camera, Matrix* mat_proj)
+void render_triangle(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics, Triangle* triangle, Camera* camera, Matrix* mat_proj, Triangle* tri_projected)
 {
     int triangle_color[4] = PINK;
     for (int i = 0; i < 3; i++)
     {
         triangle_color[i] *= triangle->shade;
     }
-    Triangle* tri_projected = create_triangle();
+    
     project_triangle(triangle, mat_proj, tri_projected);
     scale_triangle(tri_projected);
     fill_triangle(window, renderer, tri_projected, triangle_color);
     //draw_triangle(window, renderer, tri_projected, graphics->line_color);
-    destroy_triangle(tri_projected);
+    
 }
 
 void render_frame(SDL_Window *window, SDL_Renderer *renderer, Graphics* graphics, Camera* camera, Mesh* mesh, Mesh* viewed_mesh)
@@ -279,9 +289,9 @@ void draw_triangle(SDL_Window *window, SDL_Renderer *renderer, Triangle* triangl
 
 void project_vec(Vector* vec, Matrix* mat_proj, Vector* result)
 {
-    double z = vec->data[2];
+    //double z = vec->data[2];
     mat_vec_mul(mat_proj, vec, result);
-    vec_div(result, z, result);
+    vec_div(result, vec->data[2], result);
 }
 
 void draw_line(SDL_Window *window, SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int color[4])

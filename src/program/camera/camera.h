@@ -19,7 +19,7 @@ typedef struct Camera
 Camera* create_camera(void);
 void update_camera(Camera *camera, Keyboard* keyboard);
 void destroy_camera(Camera *camera);
-void view_mesh(Mesh* mesh, Camera* camera, Mesh* viewed_mesh);
-void view_triangle(Triangle* tri, Camera* camera, Triangle* viewed_tri);
+void view_triangle(Triangle* tri, Matrix* look_at_mat, Triangle* viewed_tri);
+void generate_looks_at_mat(Vector* pos, Vector* target, Vector* up, Matrix* look_at_mat);
 
 #endif

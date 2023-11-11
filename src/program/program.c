@@ -88,6 +88,7 @@ void main_loop(Program* program)
     Keyboard* keyboard = program->keyboard;
 
     char* object_name = "UtahTeapot.obj";
+    //char* object_name = "Cube.obj";
     Mesh* mesh = create_mesh_from_txt(object_name);
 
     Mesh* viewed_mesh = create_mesh(mesh->num_triangles);
@@ -138,7 +139,7 @@ void main_loop(Program* program)
         tick_sum += t2 - t1;
         frame++;
         float frame_time = (t2 - t1) ;
-        //printf("Current FPS is %d \n", (int)(1000/frame_time));
+        printf("Current FPS is %d \n", (int)(1000/frame_time));
         //printf("Average FPS is %d \n", (int)(1000/(tick_sum/frame)));
         if (frame > 40)
         {

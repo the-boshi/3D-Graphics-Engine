@@ -71,61 +71,23 @@ void generate_looks_at_mat(Vector* pos, Vector* target, Vector* up, Matrix* look
     destroy_vec(target3d); destroy_vec(pos3d); destroy_vec(new_forward); destroy_vec(tmp); destroy_vec(new_up); destroy_vec(new_right); 
 }
 
-void view_vector(Vector* vec, Camera* camera, Vector* viewed_vec)
+void view_vector(Vector* vec, Matrix* look_at_mat, Vector* viewed_vec)
 {
-    Vector* up = create_vec(COORD_3D_DIMS);
-    Vector* target = create_vec(VECTOR_4D_SIZE);
-
-    double arr_up[COORD_3D_DIMS] = { 0, 1, 0 };
-    arr_to_vec(up, &arr_up[0], COORD_3D_DIMS);
-
-    double arr_target[VECTOR_4D_SIZE] = { 0, 0, 1, 1 };
-    arr_to_vec(target, &arr_target[0], VECTOR_4D_SIZE);
-
-
-
-    vec_add(camera->position, camera->direction, target);
-
-    Matrix* look_at_mat = create_mat(VECTOR_4D_SIZE, VECTOR_4D_SIZE);
-    generate_looks_at_mat(camera->position, target, up, look_at_mat);
-
     vec_mat_mul(look_at_mat, vec, viewed_vec);
-
     viewed_vec->data[3] = 1;
-    
-
-
-    destroy_vec(up); destroy_vec(target); destroy_mat(look_at_mat);
 }
 
-void view_triangle(Triangle* tri, Camera* camera, Triangle* viewed_tri)
+void view_triangle(Triangle* tri, Matrix* look_at_mat, Triangle* viewed_tri)
 {
     for (int point = 0; point < NUM_TRIANGLE_POINTS; point++)
     {
-        view_vector(tri->points[point], camera, viewed_tri->points[point]);
+        view_vector(tri->points[point], look_at_mat, viewed_tri->points[point]);
     }
 }
 
-void view_mesh(Mesh* mesh, Camera* camera, Mesh* viewed_mesh)
-{
-    for (int triangle = 0; triangle < mesh->num_triangles; triangle++)
-    {
-        view_triangle(mesh->triangles[triangle], camera, viewed_mesh->triangles[triangle]);
-    }
-}
 
 void update_camera(Camera *camera, Keyboard* keyboard)
 {
-    /*
-    if (keyboard->keys[SDL_SCANCODE_A]) {
-        camera->position->data[Z_AXIS] -= camera->velocity->data[Z_AXIS];
-    }
-
-    if (keyboard->keys[SDL_SCANCODE_D]) {
-        camera->position->data[Z_AXIS] += camera->velocity->data[Z_AXIS];
-    }
-
-    */
 
     if (keyboard->keys[SDL_SCANCODE_SPACE]) {
         camera->position->data[Y_AXIS] -= DEFAULT_V;

@@ -148,31 +148,28 @@ void get_normal(Triangle* t, Vector* normal)
     destroy_vec(line1); destroy_vec(line2);
 }
 
-void transform_triangle(Triangle* t_in, Matrix* transformation, Triangle* t_out)
+void transform_triangle(Triangle* t_in, Matrix* transformation, Triangle* t_out, Vector* tmp)
 {
-    Vector* tmp_in = create_vec(VECTOR_4D_SIZE);
-    Vector* tmp_out = create_vec(VECTOR_4D_SIZE);
-
     for (int j = 0; j < NUM_TRIANGLE_POINTS; j++)
     {
-        copy_vec(t_in->points[j], tmp_in);
-        mat_vec_mul(transformation, tmp_in, tmp_out);
-        copy_vec(tmp_out, t_out->points[j]);
+        copy_vec(t_in->points[j], tmp);
+        mat_vec_mul(transformation, tmp, t_out->points[j]);
     }
     get_normal(t_out, t_out->normal);
 
-    destroy_vec(tmp_in); destroy_vec(tmp_out);
 }
 
 void transform_mesh(Mesh* m_in, Matrix* transform, Mesh* m_out)
 {
+    Vector* tmp = create_vec(VECTOR_4D_SIZE);
     for (int i = 0; i < m_in->num_triangles; i++)
     {
         for (int j = 0; j < NUM_TRIANGLE_POINTS; j++)
         {
-            transform_triangle(m_in->triangles[i], transform, m_out->triangles[i]);
+            transform_triangle(m_in->triangles[i], transform, m_out->triangles[i], tmp);
         }
     }
+    destroy_vec(tmp);
 }
 
 void generate_rotatation_mat(Matrix *rotation_mat, double angles[COORD_3D_DIMS])
